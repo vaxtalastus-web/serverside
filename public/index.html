@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Serverside Executor</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+        button {
+            background: #333;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background: #555;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Executor Panel</h1>
+        <div class="section">
+            <input type="text" id="username" placeholder="Enter Username">
+            <textarea id="script" rows="10" placeholder="Enter script here..."></textarea>
+            <button onclick="executeScript()">Execute</button>
+        </div>
+
+        <div class="section">
+            <h2>Running Servers</h2>
+            <table id="running-servers">
+                <thead>
+                    <tr>
+                        <th>Job ID</th>
+                        <th>Place ID</th>
+                        <th>Game Link</th>
+                        <th>Players</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Logged Games</h2>
+            <table id="logged-games">
+                <thead>
+                    <tr>
+                        <th>Place ID</th>
+                        <th>Job ID</th>
+                        <th>Game Link</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function executeScript() {
+            const username = document.getElementById('username').value;
+            const script = document.getElementById('script').value;
+            if (!username || !script) {
+                alert('Please enter a username and a script.');
+                return;
+            }
+
+            await fetch('/api/queue-script', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, script })
+            });
+            alert('Script queued for execution.');
+        }
+
+        async function fetchRunningServers() {
+            const res = await fetch('/api/running-servers');
+            const data = await res.json();
+            const tbody = document.querySelector('#running-servers tbody');
+            tbody.innerHTML = '';
+            data.forEach(server => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${server.jobId}</td>
+                    <td>${server.placeId}</td>
+                    <td><a href="https://www.roblox.com/games/${server.placeId}" target="_blank">Game</a></td>
+                    <td>${server.players}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function fetchLoggedGames() {
+            const res = await fetch('/api/logged-games');
+            const data = await res.json();
+            const tbody = document.querySelector('#logged-games tbody');
+            tbody.innerHTML = '';
+            data.forEach(game => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${game.placeId}</td>
+                    <td>${game.jobId}</td>
+                    <td><a href="https://www.roblox.com/games/${game.placeId}" target="_blank">Game</a></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        setInterval(() => {
+            fetchRunningServers();
+            fetchLoggedGames();
+        }, 5000);
+
+        fetchRunningServers();
+        fetchLoggedGames();
+    </script>
+</body>
+</html>
