@@ -1,6 +1,6 @@
 import { neon } from "@netlify/neon";
 
-export default async (req) => {
+export default async (req, context) => {
     const { searchParams } = new URL(req.url);
     const jobId = searchParams.get("jobId");
 
