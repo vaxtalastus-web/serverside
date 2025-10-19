@@ -1,6 +1,6 @@
 import { neon } from "@netlify/neon";
 
-export default async (req) => {
+export default async (req, context) => {
     if (req.method !== 'POST') {
         return new Response('Method Not Allowed', { status: 405 });
     }

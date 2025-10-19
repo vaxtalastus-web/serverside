@@ -1,6 +1,6 @@
 import { neon } from "@netlify/neon";
 
-export default async () => {
+export default async (req, context) => {
     const sql = neon();
     const games = await sql`
         SELECT place_id as "placeId", job_id as "jobId" 
